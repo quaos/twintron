@@ -1,0 +1,33 @@
+{
+  "name": "twintron",
+  "version": "0.0.1",
+  "description": "TwinTron: Minimalistic Framework & Build tool for deploying HTML5+JS Web App to Electron & Cordova",
+  "main": "main.js",
+  "bin": {
+        "twintron": "bin/cli.js"
+  },
+  "scripts": {
+    "start": "node ../../../../Programs/NetBeans 8.2/cli.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quaos/twintron.git"
+  },
+  "keywords": [
+    "cross",
+    "platform",
+    "electron",
+    "cordova",
+    "html5"
+  ],
+  "author": "QuaOs",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/quaos/twintron/issues"
+  },
+  "homepage": "https://github.com/quaos/twintron#readme",
+  "dependencies": {
+    "fs-extra": "^4.0.2"
+  }
+}
