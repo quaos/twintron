@@ -1,7 +1,64 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
+var TwinTron=require("../twintron");
 
+var cli={
+    parseArgs: function(args) {
+        var req={
+            target: null,
+            action: null,
+            args: []
+        };
+        var n=(args) ? args.length : 0;
+        var lastArg=null;
+        for (var i=2;i < n;i++) {
+            var arg=args[i];
+            //TODO: Add options
+            if (!req.target) {
+                req.target=arg;
+            } else if (!req.action) {
+                req.action=arg;
+            } else {
+                req.args.push(arg);
+            }
+            lastArg=arg;
+        }
+        return Promise.resolve(req);
+    },
+    process: function(req) {
+        var builder=null;
+        if (req.target === "electron") {
+            builder=TwinTron.ElectronBuilder();
+        } else if (req.target === "cordova") {
+            builder=TwinTron.CordovaBuilder();
+        } else {
+            var err=new Error("Unknown/unsupported target: "+req.target);
+            return Promise.reject(err);
+        }
+        
+        var result=0;
+        if (req.action === "init") {
+            result=builder.init(req.args);
+        } else if (req.action === "build") {
+            result=builder.build(req.args);
+        } else {
+            var err=new Error("Unknown/unsupported action: "+req.action);
+            return Promise.reject(err);
+        }
+        
+        console.log("Done. ("+result+")");
+        
+        return result;
+    }
+};
+
+module.exports=cli.parseArgs(process.argv)
+    .then(function(req) {
+        return cli.process(req);
+    })
+    .then(function(rc) {
+        process.exit(rc);
+    })
+    .catch(function(err) {
+        console.error(err);
+        process.exit(-1);
+    })
