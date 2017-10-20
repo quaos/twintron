@@ -1,11 +1,17 @@
 
 var fs=require("fs-extra");
+var utils=require("./q-utils");
 
 //Namespaces
 var TwinTron=TwinTron || {};
 
-//TODO:
-TwinTron.ElectronBuilder=require("./twintron-electron-builder");
-TwinTron.CordovaBuilder=require("./twintron-cordova-builder");
+TwinTron.NavigationController=function TwinTron_NavigationController(opts) {
+    //TODO:
+};
+TwinTron.NavigationController.prototype={
+    //TODO:
+    
+};
+
 
 module.exports=TwinTron;

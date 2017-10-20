@@ -1,16 +1,16 @@
 
 //Namespaces
-var QPStudio=QPStudio || {};
+var TwinTron=TwinTron || {};
 
-QPStudio.App = function(opts) {
+TwinTron.WebApp = function(opts) {
     if (opts) {
         this.document=opts.document || document;
         this.window=opts.window || window;
         this.jQuery=opts.jQuery || jQuery;
     }
 };
-QPStudio.App.prototype={
-    constructor: QPStudio.App,
+TwinTron.WebApp.prototype={
+    constructor: TwinTron.WebApp,
     document: null,
     window: null,
     jQuery: null,
@@ -20,13 +20,14 @@ QPStudio.App.prototype={
     initialize: function() {
         var j$=this.jQuery;
         this.mainNav=this.document.getElementById("mainNav");
+        //TODO: Attach navigation controller
         j$(this.mainNav).show();
         
         console.log("QPStudio App initialized");
     }
 };
 
-var app=new QPStudio.App({
+var app=new TwinTron.WebApp({
     document: document,
     window: window,
     jQuery: jQuery.noConflict(true)

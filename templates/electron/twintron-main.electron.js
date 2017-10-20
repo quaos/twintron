@@ -1,3 +1,6 @@
+
+var TwinTron=require("./twintron");
+
 const electron = require('electron')
 // Module to control application life.
 const app = electron.app
@@ -20,15 +23,13 @@ function createWindow () {
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'www/twintron.electron.html'),
+    pathname: path.join(__dirname, "twintron.electron.html"),
     protocol: 'file:',
     slashes: true
   }));
 
  //Inject TwinTron adapter interfaces into mainWindow
-  mainWindow.TwinTron={
-	  //TODO:
-  };
+  mainWindow.TwinTron=TwinTron;
   
   // Open the DevTools.
   mainWindow.webContents.openDevTools();

@@ -1,5 +1,8 @@
 
-var TwinTron=require("../twintron");
+//Namespaces
+var TwinTron=TwinTron || {};
+
+TwinTron.Builders=require("../twintron-builders");
 
 var cli={
     parseArgs: function(args) {
@@ -26,10 +29,12 @@ var cli={
     },
     process: function(req) {
         var builder=null;
-        if (req.target === "electron") {
-            builder=TwinTron.ElectronBuilder();
+        if (req.target === "web") {
+            builder=TwinTron.Builders.WebBuilder();
+        } if (req.target === "electron") {
+            builder=TwinTron.Builders.ElectronBuilder();
         } else if (req.target === "cordova") {
-            builder=TwinTron.CordovaBuilder();
+            builder=TwinTron.Builders.CordovaBuilder();
         } else {
             var err=new Error("Unknown/unsupported target: "+req.target);
             return Promise.reject(err);
