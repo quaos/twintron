@@ -27,15 +27,19 @@ TwinTron_WebBuilder.prototype={
                 var appName=config.appName || packageObj.name;
                 (config.mainPageFile) && (destMainPageFile=config.mainPageFile);
                 
-                console.log("Initializing twintron web app: "+appName+"; main page: "+mainPageFile);
+                console.log("Initializing twintron web app: "+appName+"; main page: "+destMainPageFile);
                 return fs.ensureDir(destDir);
             })
             .then(function() {
-                var srcMainPagePath=path.join(tmplDir,srcMainPageFile)
-                return builder.copyTree(tmplDir,destDir,function(fName) {
+                var srcMainPagePath=path.join(tmplDir,srcMainPageFile);
+                console.log("Copying files from source path: "+tmplDir+" -> "+destDir);
+                return utils.copyTree(tmplDir,destDir,function(fName) {
                     if (fName === srcMainPagePath) {
-                        return destMainPageFile;
+                        console.log("Copying: "+fName+" -> "+destMainPageFile);
+                        fName=destMainPageFile;
+                        return fName;
                     }
+                    console.log("Copying: "+fName);
                     return true;
                 });
             })
@@ -60,7 +64,6 @@ TwinTron_WebBuilder.prototype={
                         overwrite: true
                     }));
                 })
-                
             })
             .then(function() {
                 console.log("Task finished: init");
@@ -113,36 +116,6 @@ TwinTron_WebBuilder.prototype={
                 return Promise.resolve(true);
             }); 
             */
-    },
-    
-    copyTree: function(srcDir,destDir,srcFilter) {
-        console.log("Copying files from source path: "+srcDir+" -> "+destDir);
-        return fs.readdir(srcDir)
-            .then(function(srcFiles) {
-                var proms=[];
-                (srcFiles) && (srcFiles.forEach(function(fName) {
-                    var srcPath=path.join(srcDir,fName);
-                    if (srcFilter) {
-                        var fltResult=srcFilter(srcPath);
-                        if (!fltResult) {
-                            return false;
-                        }
-                        if (typeof fltResult === "string") {
-                            fName=fltResult;
-                            srcPath=path.join(srcDir,fName);
-                        }
-                    }
-                    var destPath=path.join(destDir,fName);
-                    
-                    console.log("Copying: "+fName);
-                    //console.log("Copying file: "+srcPath+" -> "+destPath); 
-                    
-                    proms.push(fs.copy(srcPath,destPath, {
-                        overwrite: true
-                    }));
-                }));
-                return Promise.all(proms);
-            });
     }
 };
 

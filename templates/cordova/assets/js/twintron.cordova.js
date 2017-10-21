@@ -21,6 +21,18 @@
 var TwinTron=TwinTron || {};
 
 (function(_package) {
+    function TwinTron_StorageImpl_Cordova(opts) {    
+       this.opts=opts;
+    };
+    TwinTron_StorageImpl_Cordova.prototype={
+
+    };
+    function TwinTron_StorageImpl_Cordova$Factory(opts) {
+       return new TwinTron_StorageImpl_Cordova(opts);
+    };
+    utils.makeFactory(TwinTron_StorageImpl_Cordova, TwinTron_StorageImpl_Cordova$Factory);
+    TwinTron.Storage=TwinTron_StorageImpl_Cordova$Factory;
+    
     function TwinTron_CordovaApp(opts) {
         if (opts) {
             this.document=opts.document || document;
@@ -37,9 +49,13 @@ var TwinTron=TwinTron || {};
 
         // Application Constructor
         initialize: function() {
+            
+            
+            
             var j$=this.jQuery;
             this.mainContainer=this.document.getElementById("mainContainer");
             j$(this.mainContainer).hide();
+            
             this.document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
 
             console.log("TwinTron CordovaApp initialized");
@@ -50,6 +66,16 @@ var TwinTron=TwinTron || {};
         // Bind any cordova events here. Common events are:
         // 'pause', 'resume', etc.
         onDeviceReady: function() {
+            var win=this.window;
+            var j$=this.jQuery;
+            //Inject TwinTron API into mainContainer IFrame's Window
+            this.mainContainer.contentWindow.TwinTron=TwinTron;
+			
+            this.mainContainer.src="index.common.html";
+            this.mainContainer.width=win.clientWidth;
+            this.mainContainer.height=win.clientHeight;
+            j$(this.mainContainer).show();
+
             this.receivedEvent('deviceready');
         },
 
@@ -62,16 +88,6 @@ var TwinTron=TwinTron || {};
 
             j$(listeningElement).hide();
             j$(receivedElement).show();
-
-		 //Inject TwinTron adapter interfaces into mainContainer IFrame's Window
-		  this.mainContainer.contentWindow.TwinTron={
-			  //TODO:
-		  };
-			
-            this.mainContainer.src="index.common.html";
-			this.mainContainer.width=window.clientWidth;
-			this.mainContainer.height=window.clientHeight;
-            j$(this.mainContainer).show();
 
             console.log('Received Event: ' + id);
         }
@@ -87,11 +103,10 @@ var TwinTron=TwinTron || {};
 
 /**
  * Sample code to initialize TwinTron.CordovaApp:
- * 
+ */
 var app=TwinTron.CordovaApp({
     document: document,
     window: window,
     jQuery: jQuery.noConflict(true)
 });
 document.addEventListener("DOMContentLoaded", app.initialize.bind(app));
-*/

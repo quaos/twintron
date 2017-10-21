@@ -28,7 +28,23 @@ TwinTron_ElectronBuilder.prototype={
                 return fs.ensureDir(destDir);
             })
             .then(function() {
-                return builder.copyTree(tmplDir,destDir);
+                var depsFiles=[ "twintron.js", "q-utils-node.js" ];
+                console.log("Copying dependencies files from source path: "+modDir+" -> "+destDir);
+                return utils.copyTree(modDir,destDir,function(fPath) {
+                    var fName=path.relative(modDir,fPath);
+                    //console.log(fName);
+                    var included=(depsFiles.indexOf(fName) >= 0);
+                    (included) && console.log("Copying: "+fName);
+                    return included;
+                });
+            })
+            .then(function() {
+                console.log("Copying files from source path: "+tmplDir+" -> "+destDir);
+                return utils.copyTree(tmplDir,destDir,function(fName) {
+                    var included=true; //(excludedFiles.indexOf(fName) < 0);
+                    (included) && console.log("Copying: "+fName);
+                    return included;
+                });
             })
             .then(function() {
                 console.log("Task finished: init");
@@ -51,16 +67,39 @@ TwinTron_ElectronBuilder.prototype={
                 var appName=config.appName || packageObj.name;
                 
                 console.log("Building electron app: "+appName);
-                return builder.copyTree(srcDir,destDir,function(fName) {
-                    return (excludedFiles.indexOf(fName) < 0);
+                console.log("Copying files from source path: "+srcDir+" -> "+destDir);
+                return utils.copyTree(srcDir,destDir,function(fName) {
+                    var included=(excludedFiles.indexOf(fName) < 0);
+                    (included) && console.log("Copying: "+fName);
+                    return included;
                 });
             })
             .then(function() {
                 return new Promise(function(resolve,reject) {
-                    var eBuildOpts={
+                    var cmd="npm install";
+                    var cmdOpts={
                         cwd: destDir
                     };
-                    child_process.exec("ebuild .",eBuildOpts,function(err,stdout,stderr) {
+                    console.log("> "+cmd);
+                    child_process.exec(cmd,cmdOpts,function(err,stdout,stderr) {
+                        console.log(stdout);
+                        console.log(stderr);
+                        if (err) {
+                            reject(err);
+                            return false;
+                        }
+                        resolve(stdout);
+                    });
+                });
+            })
+            .then(function() {
+                return new Promise(function(resolve,reject) {
+                    var cmd="ebuild .";
+                    var cmdOpts={
+                        cwd: destDir
+                    };
+                    console.log("> "+cmd);
+                    child_process.exec(cmd,cmdOpts,function(err,stdout,stderr) {
                         console.log(stdout);
                         console.log(stderr);
                         if (err) {

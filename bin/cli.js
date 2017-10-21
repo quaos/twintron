@@ -31,7 +31,7 @@ var cli={
         var builder=null;
         if (req.target === "web") {
             builder=TwinTron.Builders.WebBuilder();
-        } if (req.target === "electron") {
+        } else if (req.target === "electron") {
             builder=TwinTron.Builders.ElectronBuilder();
         } else if (req.target === "cordova") {
             builder=TwinTron.Builders.CordovaBuilder();
