@@ -1,0 +1,14 @@
+
+nav ul {
+    display: table-row;
+}
+
+nav ul li {
+    display: table-cell;
+    background-color: #c0c0c0;
+}
+
+nav ul li.active {
+    background-color: #ffffff;
+    font-weight: bold;
+}

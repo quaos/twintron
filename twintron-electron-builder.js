@@ -28,17 +28,36 @@ TwinTron_ElectronBuilder.prototype={
                 return fs.ensureDir(destDir);
             })
             .then(function() {
-                var depsFiles=[ "twintron.js", "q-utils-node.js" ];
-                console.log("Copying dependencies files from source path: "+modDir+" -> "+destDir);
-                return utils.copyTree(modDir,destDir,function(fPath) {
-                    var fName=path.relative(modDir,fPath);
-                    //console.log(fName);
-                    var included=(depsFiles.indexOf(fName) >= 0);
-                    (included) && console.log("Copying: "+fName);
-                    return included;
+                //Step 1: Copy dependency files to main dir
+                var depsFiles=[ "twintron.js", "q-utils.js" ];
+                console.log("Copying dependency files from source path: "+modDir);
+                var proms=[];
+                depsFiles.forEach(function(fName) {
+                    var srcPath=path.join(modDir,fName);
+                    var srcExt=path.extname(fName);
+                    var destDir2=destDir;
+                    /*if ((!srcExt) && (srcExt !== 0)) {
+                    } else if (srcExt === ".js") {
+                        destDir2=path.join(destDir,"assets","js");
+                    } else if (srcExt === ".css") {
+                        destDir2=path.join(destDir,"assets","css");
+                    } else if (srcExt.match(/^\.(png|jpg|jpeg|gif|tif|tiff|svg|ico)$/i)) {
+                        destDir2=path.join(destDir,"assets","img");
+                    }*/
+                    var destPath=path.join(destDir2,fName);
+                    
+                    console.log("Copying: "+srcPath+" ["+srcExt+"] -> "+destPath);
+                    proms.push(fs.ensureDir(destDir2)
+                        .then(function() {
+                            return fs.copy(srcPath,destPath, {
+                                overwrite: true
+                            });
+                        })
+                    );
                 });
             })
             .then(function() {
+                //Step 1: Copy template files
                 console.log("Copying files from source path: "+tmplDir+" -> "+destDir);
                 return utils.copyTree(tmplDir,destDir,function(fName) {
                     var included=true; //(excludedFiles.indexOf(fName) < 0);
@@ -78,12 +97,13 @@ TwinTron_ElectronBuilder.prototype={
                 return new Promise(function(resolve,reject) {
                     var cmd="npm install";
                     var cmdOpts={
-                        cwd: destDir
+                        cwd: destDir,
+                        stdio: "inherit"
                     };
                     console.log("> "+cmd);
                     child_process.exec(cmd,cmdOpts,function(err,stdout,stderr) {
-                        console.log(stdout);
-                        console.log(stderr);
+                        //console.log(stdout);
+                        //console.log(stderr);
                         if (err) {
                             reject(err);
                             return false;
@@ -96,12 +116,13 @@ TwinTron_ElectronBuilder.prototype={
                 return new Promise(function(resolve,reject) {
                     var cmd="ebuild .";
                     var cmdOpts={
-                        cwd: destDir
+                        cwd: destDir,
+                        stdio: "inherit"
                     };
                     console.log("> "+cmd);
                     child_process.exec(cmd,cmdOpts,function(err,stdout,stderr) {
-                        console.log(stdout);
-                        console.log(stderr);
+                        //console.log(stdout);
+                        //console.log(stderr);
                         if (err) {
                             reject(err);
                             return false;

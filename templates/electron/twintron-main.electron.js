@@ -17,6 +17,7 @@ console.log("Electron main process: ");
 console.log(process);
 
 app.opts=null;
+app.navigationController=null;
 app.initApp=function initApp() {
     function TwinTron_StorageImpl_Electron(opts) {    
        this.opts=opts;
@@ -30,6 +31,18 @@ app.initApp=function initApp() {
     utils.makeFactory(TwinTron_StorageImpl_Electron, TwinTron_StorageImpl_Electron$Factory);
     TwinTron.Storage=TwinTron_StorageImpl_Electron$Factory;
     
+    this.navigationController=TwinTron.NavigationController({
+        /*links: [
+            { title: "Home", url: "index.html" },
+            { title: "About", url: "about.html" },
+        ]*/
+    });
+    this.navigationController.on(TwinTron.NavigationController.EVT_LINK, function onLink(evt) {
+        //win.location.href=evt.link.url;
+        console.log("Navigating to page: "+evt.link.url);
+        //TODO:
+    });
+
     if (!this.mainWindow) {
         this.mainWindow=this.createWindow();
     }
@@ -39,6 +52,8 @@ app.initApp=function initApp() {
 // be closed automatically when the JavaScript object is garbage collected.
 app.mainWindow=null;
 app.createWindow=function createWindow(opts) {
+    opts=opts || {};
+    
     // Create the browser window.
     var w=opts.width || 800;
     var h=opts.height || 600;
@@ -54,7 +69,9 @@ app.createWindow=function createWindow(opts) {
 
     //Inject TwinTron adapter interfaces into window
     win.TwinTron=TwinTron;
-
+    win.app=app;
+    win.navigationController=app.navigationController;
+    
     // Open the DevTools.
     win.webContents.openDevTools();
 

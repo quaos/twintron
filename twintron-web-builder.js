@@ -45,25 +45,31 @@ TwinTron_WebBuilder.prototype={
             })
             .then(function() {
                 var depsFiles=[ "twintron.js", "q-utils.js" ];
+                console.log("Copying dependency files from source path: "+modDir);
                 var proms=[];
                 depsFiles.forEach(function(fName) {
                     var srcPath=path.join(modDir,fName);
                     var srcExt=path.extname(fName);
-                    var destPath=path.join(destDir,"www",fName);
+                    var destDir2=destDir;
                     if ((!srcExt) && (srcExt !== 0)) {
-                    } else if (srcExt === "js") {
-                        destPath=path.join(destDir,"www","assets","js",fName);
-                    } else if (srcExt === "css") {
-                        destPath=path.join(destDir,"www","assets","css",fName);
-                    } else if (srcExt.match(/^(png|jpg|jpeg|gif|tif|tiff|svg|ico)$/i)) {
-                        destPath=path.join(destDir,"www","assets","img",fName);
+                    } else if (srcExt === ".js") {
+                        destDir2=path.join(destDir,"assets","js");
+                    } else if (srcExt === ".css") {
+                        destDir2=path.join(destDir,"assets","css");
+                    } else if (srcExt.match(/^\.(png|jpg|jpeg|gif|tif|tiff|svg|ico)$/i)) {
+                        destDir2=path.join(destDir,"assets","img");
                     }
+                    var destPath=path.join(destDir2,fName);
                     
-                    console.log("Copying: "+srcPath+" -> "+destPath);
-                    proms.push(fs.copy(srcPath,destPath, {
-                        overwrite: true
-                    }));
-                })
+                    console.log("Copying: "+srcPath+" ["+srcExt+"] -> "+destPath);
+                    proms.push(fs.ensureDir(destDir2)
+                        .then(function() {
+                            return fs.copy(srcPath,destPath, {
+                                overwrite: true
+                            });
+                        })
+                    );
+                });
             })
             .then(function() {
                 console.log("Task finished: init");

@@ -18,8 +18,5 @@
   "license": "CC0-1.0",
   "dependencies": {
     "fs-extra": "^4.0.2"
-  },
-  "devDependencies": {
-    "electron": "~1.7.8"
   }
 }

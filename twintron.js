@@ -6,11 +6,11 @@ var utils=require("./q-utils");
 var TwinTron=TwinTron || {};
 
 function TwinTron_Storage(opts) {
-    //TODO:
 };
 TwinTron_Storage.prototype={
-    //TODO:
-    
+    getItem: function(item) { throw new Error("Not implemented"); },
+    putItem: function(item) { throw new Error("Not implemented"); },
+    removeItem: function(item) { throw new Error("Not implemented"); }
 };
 TwinTron.Storage=TwinTron_Storage;
 
@@ -27,6 +27,7 @@ function TwinTron_NavigationLink(opts) {
 TwinTron_NavigationLink.prototype={
     url: null,
     title: null,
+    icon: null,
     active: false
 };
 TwinTron.NavigationLink=TwinTron_NavigationLink;
@@ -36,22 +37,30 @@ function TwinTron_NavigationController(opts) {
     var _private={
         listenersMap: {}
     };
+    this.linksMap={};
+    this.history=[];
+    this.opts=opts || {};
+    if (opts) {
+        (opts.links) && opts.links.forEach(function(linkAttrs) {
+            ctrl.addLink(new TwinTron_NavigationLink(linkAttrs));
+        });
+    }
+    //TODO:
     this.on=function addListener(evtID,callback) {
-        var listeners=this.listenersMap[evtID];
+        var listeners=_private.listenersMap[evtID];
         if (!listeners) {
             listeners=[];
-            this.listenersMap[evtID]=listeners;
+            _private.listenersMap[evtID]=listeners;
         }
         listeners.push(callback);
     };
     this.fireEvent=function(evt) {
         (!evt.source) && (evt.source=ctrl);
-        var listeners=this.listenersMap[evt.id];
+        var listeners=_private.listenersMap[evt.id];
         (listeners) && (listeners.forEach(function(listener) {
             listener(evt);
         }));
     };
-    //TODO:
     
 };
 utils.merge(TwinTron_NavigationController,{
@@ -61,9 +70,18 @@ utils.merge(TwinTron_NavigationController,{
 TwinTron_NavigationController.prototype={
     //TODO:
     activeLink: null,
-    linksMap: {},
-    history: [],
+    linksMap: null,
+    history: null,
     
+    addLinks: function(links) {
+        var ctrl=this;
+        (links) && links.forEach(function(link) {
+            ctrl.addLink(link);
+        });
+    },
+    addLink: function(link) {
+        this.linksMap[link.url]=link;
+    },
     pushURL: function(url) {
         var _static=TwinTron_NavigationController;
         var link=this.linksMap[url];
