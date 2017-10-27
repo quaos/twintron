@@ -10,23 +10,39 @@ and open the template in the editor.
         <!-- Required meta tags -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="assets/css/font-awesome.min.css"/>
+        <link rel="stylesheet" href="assets/css/glyphicons.css"/>
+        <link rel="stylesheet" href="assets/css/tether.min.css"/>
         <link rel="stylesheet" href="assets/css/bootstrap.min.css"/>
         <link rel="stylesheet" href="assets/css/index.css"/>
     </head>
     <body>
         <h1>About TwinTron</h1>
         <nav id="mainNav">
-            <ul>
-                <!-- <li><a id="mainBtn" href="index.common.html" class="btn btn-info"><span class="glyphicon glyphicon-circle-arrow-left"></span>Back to main</a></li> -->
+            <ul class="nav nav-pills">
             </ul>
         </nav>
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-        <script src="assets/js/jquery-3.2.1.slim.min.js"></script>
-        <script src="assets/js/bootstrap.min.js"></script>
-        <script src="assets/js/q-require.js"></script>
-        <script src="assets/js/index.js"></script>
+        <script type="text/javascript" src="assets/js/jquery-3.2.1.slim.min.js"></script>
+        <script type="text/javascript" src="assets/js/popper.min.js"></script>
+    <script type="text/javascript" src="assets/js/tether.min.js"></script>
+        <script type="text/javascript" src="assets/js/bootstrap.bundle.min.js"></script>
+        <script type="text/javascript" src="assets/js/q-require.js"></script>
+        <script type="text/javascript">
+        //Namespaces
+        var TwinTron=TwinTron || {};
+        </script>
+        <script type="text/javascript" src="assets/js/main-bundle.js"></script>
+        <script type="text/javascript">
+        (function(doc,win,j$) {
+            var app=new TwinTron.WebApp({
+                document: doc,
+                window: win,
+                jQuery: j$
+            });
+            doc.addEventListener("DOMContentLoaded", app.initialize.bind(app));
+        })(document,window,jQuery.noConflict(true));
+        </script>
     </body>
 </html>

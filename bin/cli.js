@@ -45,12 +45,12 @@ var cli={
             result=builder.init(req.args);
         } else if (req.action === "build") {
             result=builder.build(req.args);
+        } else if (req.action === "run") {
+            result=builder.run(req.args);
         } else {
             var err=new Error("Unknown/unsupported action: "+req.action);
             return Promise.reject(err);
         }
-        
-        console.log("Done. ("+result+")");
         
         return result;
     }
@@ -60,8 +60,9 @@ module.exports=cli.parseArgs(process.argv)
     .then(function(req) {
         return cli.process(req);
     })
-    .then(function(rc) {
-        process.exit(rc);
+    .then(function(result) {
+        console.log("Done. ("+result+")");
+        process.exit(0);
     })
     .catch(function(err) {
         console.error(err);

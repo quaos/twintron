@@ -1,0 +1,17 @@
+{
+  "name": "twintron-webapp-src",
+  "version": "1.0.0",
+  "description": "TwinTron webapp source package",
+  "main": "main.js",
+  "scripts": {
+  },
+  "keywords": [
+    "twintron",
+    "template"
+  ],
+  "author": "QuaOs",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "fs-extra": "^4.0.2"
+  }
+}

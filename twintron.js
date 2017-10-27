@@ -1,9 +1,10 @@
 
-//var fs=require("fs-extra");
-var utils=require("./q-utils");
-
 //Namespaces
 var TwinTron=TwinTron || {};
+
+//Dependencies
+//var fs=require("fs-extra");
+var utils=require("./q-utils");
 
 function TwinTron_Storage(opts) {
 };
@@ -37,6 +38,7 @@ function TwinTron_NavigationController(opts) {
     var _private={
         listenersMap: {}
     };
+    this.links=[];
     this.linksMap={};
     this.history=[];
     this.opts=opts || {};
@@ -70,6 +72,7 @@ utils.merge(TwinTron_NavigationController,{
 TwinTron_NavigationController.prototype={
     //TODO:
     activeLink: null,
+    links: null,
     linksMap: null,
     history: null,
     
@@ -80,13 +83,16 @@ TwinTron_NavigationController.prototype={
         });
     },
     addLink: function(link) {
+        this.links.push(link);
         this.linksMap[link.url]=link;
     },
     pushURL: function(url) {
         var _static=TwinTron_NavigationController;
         var link=this.linksMap[url];
         if (link) {
-            this.activeLink=true;
+            (this.activeLink) && (this.activeLink.active=false);
+            link.active=true;
+            this.activeLink=link;
         }
         this.history.push(url);
         this.fireEvent({

@@ -1,6 +1,4 @@
 
-var path=require("path");
-
 var utils={
     merge: function(dest,src,deep) {
         for (var k in src) {
@@ -26,7 +24,12 @@ var utils={
     
     makeFactory: function(cls,fac) {
         if (!fac) {
-            
+            fac=new function() {
+                var instance=Object.create(cls.prototype);
+                var _constructor=cls.prototype.constructor || cls;
+                _constructor.apply(instance,arguments);
+                return instance;
+            };
         }
         utils.merge(fac,cls);
         fac.prototype=cls.prototype;
@@ -34,6 +37,7 @@ var utils={
     
     copyTree: function(srcDir,destDir,srcFilter) {
         var fs=require("fs-extra");
+        var path=require("path");
         //console.log("Copying files from source path: "+srcDir+" -> "+destDir);
         return fs.readdir(srcDir)
             .then(function(srcFiles) {
@@ -61,6 +65,26 @@ var utils={
                 }));
                 return Promise.all(proms);
             });
+    },
+    
+    exec: function(cmd,args,workDir) {
+        var child_process=require("child_process");
+        var cmdOpts={
+            cwd: workDir,
+            stdio: "inherit"
+        };
+        console.log("> "+cmd+" "+args.join(" "));
+        return new Promise(function(resolve,reject) {
+            var ps=child_process.spawn(cmd,args,cmdOpts);
+            ps.on("exit", function (code, signal) {
+                if (code !== 0) {
+                    var err=new Error("Command exited with code ["+code+"], signal: "+signal);
+                    reject(err);
+                    return;
+                }
+                resolve(code);
+            });
+        });
     }
 };
 

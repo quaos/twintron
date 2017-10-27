@@ -15,7 +15,7 @@ TwinTron_ElectronBuilder.prototype={
         var builder=this;
         var modDir=__dirname;
         var tmplDir=path.join(__dirname,"templates","electron");
-        var workDir=this.opts.workDir || ".";
+        var workDir=this.opts.workDir || process.cwd();
         var destDir=path.join(workDir,"electron");
         
         var config=this.opts;
@@ -74,7 +74,7 @@ TwinTron_ElectronBuilder.prototype={
         var builder=this;
         var modDir=__dirname;
         //var tmplDir=path.join(__dirname,"templates","electron");
-        var workDir=this.opts.workDir || ".";
+        var workDir=this.opts.workDir || process.cwd();
         var srcDir=path.join(workDir,"www");
         var destDir=path.join(workDir,"electron");
         var excludedFiles=[ "package.json" ];
@@ -94,74 +94,30 @@ TwinTron_ElectronBuilder.prototype={
                 });
             })
             .then(function() {
-                return new Promise(function(resolve,reject) {
-                    var cmd="npm install";
-                    var cmdOpts={
-                        cwd: destDir,
-                        stdio: "inherit"
-                    };
-                    console.log("> "+cmd);
-                    child_process.exec(cmd,cmdOpts,function(err,stdout,stderr) {
-                        //console.log(stdout);
-                        //console.log(stderr);
-                        if (err) {
-                            reject(err);
-                            return false;
-                        }
-                        resolve(stdout);
-                    });
-                });
+                var cmd="npm";
+                var cmdArgs=[ "install" ];
+                return utils.exec(cmd,cmdArgs,destDir);
             })
             .then(function() {
-                return new Promise(function(resolve,reject) {
-                    var cmd="ebuild .";
-                    var cmdOpts={
-                        cwd: destDir,
-                        stdio: "inherit"
-                    };
-                    console.log("> "+cmd);
-                    child_process.exec(cmd,cmdOpts,function(err,stdout,stderr) {
-                        //console.log(stdout);
-                        //console.log(stderr);
-                        if (err) {
-                            reject(err);
-                            return false;
-                        }
-                        resolve(stdout);
-                    });
-                });
+                var cmd="ebuild";
+                var cmdArgs=[ "." ];
+                return utils.exec(cmd,cmdArgs,destDir);
             })
             .then(function() {
                 console.log("Task finished: build");
                 return Promise.resolve(true);
             }); 
     },
-    
-    copyTree: function(srcDir,destDir,srcFilter) {
-        console.log("Copying files from source path: "+srcDir+" -> "+destDir);
-        return fs.readdir(srcDir)
-            .then(function(srcFiles) {
-                var proms=[];
-                (srcFiles) && (srcFiles.forEach(function(fName) {
-                    if (srcFilter) {
-                        var fltResult=srcFilter(fName);
-                        if (!fltResult) {
-                            return false;
-                        }
-                        (typeof fltResult === "string") && (fName=fltResult);
-                    }
-                    var srcPath=path.join(srcDir,fName);
-                    var destPath=path.join(destDir,fName);
-                    
-                    console.log("Copying: "+fName);
-                    //console.log("Copying file: "+srcPath+" -> "+destPath); 
-                    
-                    proms.push(fs.copy(srcPath,destPath, {
-                        overwrite: true
-                    }));
-                }));
-                return Promise.all(proms);
-            });
+    run: function(args) {
+        var builder=this;
+        var modDir=__dirname;
+        //var tmplDir=path.join(__dirname,"templates","electron");
+        var workDir=this.opts.workDir || process.cwd();
+        var destDir=path.join(workDir,"electron");
+        
+        var cmd="electron";
+        var cmdArgs=[ "." ];
+        return utils.exec(cmd,cmdArgs,destDir);
     }
 };
 
