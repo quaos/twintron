@@ -47,7 +47,6 @@ function TwinTron_NavigationController(opts) {
             ctrl.addLink(new TwinTron_NavigationLink(linkAttrs));
         });
     }
-    //TODO:
     this.on=function addListener(evtID,callback) {
         var listeners=_private.listenersMap[evtID];
         if (!listeners) {
@@ -55,15 +54,23 @@ function TwinTron_NavigationController(opts) {
             _private.listenersMap[evtID]=listeners;
         }
         listeners.push(callback);
+        //TEST {
+        console.log("TwinTron_NavigationController.on(): "+evtID);
+        console.log(listeners);
+        // }
     };
     this.fireEvent=function(evt) {
         (!evt.source) && (evt.source=ctrl);
         var listeners=_private.listenersMap[evt.id];
-        (listeners) && (listeners.forEach(function(listener) {
-            listener(evt);
-        }));
+        if (listeners) {
+            //TEST {
+            console.log("TwinTron_NavigationController: Dispatching event: "+evt.id+" to "+listeners.length+" listeners");
+            // }
+            listeners.forEach(function(listener) {
+                listener(evt);
+            });
+        }
     };
-    
 };
 utils.merge(TwinTron_NavigationController,{
     //statics
@@ -91,6 +98,7 @@ TwinTron_NavigationController.prototype={
         var link=this.linksMap[url];
         if (link) {
             (this.activeLink) && (this.activeLink.active=false);
+            console.log("Active link URL: "+url);
             link.active=true;
             this.activeLink=link;
         }

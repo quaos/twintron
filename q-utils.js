@@ -15,16 +15,16 @@ var utils={
     
     extendClass: function(parent,childProto,childStatic) {
         var childProto2=Object.create(parent.prototype);
-        childProto2._super=parent;
-        childProto2.constructor._super=parent;
         (childProto) && utils.merge(childProto2,childProto);
         (childStatic) && utils.merge(childProto2.constructor,childStatic);
+        childProto2._super=parent;
+        childProto2.constructor._super=parent;
         return childProto2;
     },
     
     makeFactory: function(cls,fac) {
         if (!fac) {
-            fac=new function() {
+            fac=new function utils_factory() {
                 var instance=Object.create(cls.prototype);
                 var _constructor=cls.prototype.constructor || cls;
                 _constructor.apply(instance,arguments);
@@ -33,6 +33,8 @@ var utils={
         }
         utils.merge(fac,cls);
         fac.prototype=cls.prototype;
+        
+        return fac;
     },
     
     copyTree: function(srcDir,destDir,srcFilter) {

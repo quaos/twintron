@@ -36,60 +36,109 @@ var TwinTron=window.TwinTron || {};
         document: null,
         window: null,
         jQuery: null,
+        mainContainer: null,
         mainNav: null,
 
-        initialize: function() {
+        initApp: function() {
             var app=this;
             var doc=this.document;
             var win=this.window;
             var j$=this.jQuery;
-            var mainNav=doc.getElementById("mainNav");
-
+            
+            var mainContainer=this.document.getElementById("mainContainer");
+            j$(this.mainContainer).hide();
+            //mainContainer.src="home.html";
+            mainContainer.contentWindow.width=win.clientWidth;
+            mainContainer.contentWindow.height=win.clientHeight-mainContainer.offsetTop; //win.clientTop;
+            this.mainContainer=mainContainer;
+            
             //Attach navigation controller (Auto create if not existing)
-            if (!win.navigationController) {
+            var navCtrl=win.navigationController;
+            if (!navCtrl) {
                 console.warn("No navigation controller, creating standalone one");
-                win.navigationController=new TwinTron.NavigationController({ });
-                win.navigationController.on(TwinTron.NavigationController.EVT_LINK, function onLink(evt) {
+                navCtrl=new TwinTron.NavigationController({ });
+                navCtrl.on(TwinTron.NavigationController.EVT_LINK, function TwinTron_WebApp_onLink(evt) {
                     console.log("Navigating to: "+evt.url);
-                    win.location.href=evt.url;
+                    mainContainer.src=evt.url;
                 });
+                win.navigationController=navCtrl;
             }
-            var links=win.navigationController.links;
+            var links=navCtrl.links;
             //TEST {
-            console.log(links);
+            //console.log(links);
             // }
             if ((!links) || (links.length <= 0)) {
-                links=navlinks(TwinTron,win.navigationController).init();
+                links=navlinks(TwinTron,navCtrl).init();
             }
-
+            
+            function onMainContainerLoaded() {
+                console.log("Attaching navigation controller to container: "+mainContainer.contentWindow.location.href);
+                mainContainer.contentWindow.navigationController=navCtrl;
+            };
+            //j$(mainContainer).load(onMainContainerLoaded);
+            mainContainer.onreadystatechange=function() {
+                (mainContainer.readyState === "complete") && onMainContainerLoaded();
+            };
+            mainContainer.onload=onMainContainerLoaded;
+            //mainContainer.contentWindow.onload=onMainContainerLoaded;
+            //mainContainer.contentWindow.navigationController=navCtrl;
+            
+            console.log("TwinTron Web App initialized");
+            
+            j$(mainContainer).show();
+            navCtrl.pushURL("home.html");
+        },
+        
+        initPage: function() {
+            var app=this;
+            var doc=this.document;
+            var win=this.window;
+            var j$=this.jQuery;
+            
+            var navCtrl=win.navigationController;
+            //Attach navigation controller
+            if ((!navCtrl) && (win.parent)) {
+                console.log("Inherited navigation controller from parent: "+win.parent.location.href);
+                navCtrl=win.parent.navigationController;
+            }
+            if (!navCtrl) {
+                console.warn("No navigation controller available");
+            }
+            var links=(navCtrl) ? navCtrl.links : null;
+            
             //Initialize nav UI
+            var mainNav=doc.getElementById("mainNav");
             var ulNode=mainNav.querySelector("ul");
             if (!ulNode) {
                 ulNode=doc.createElement("ul");
+                ulNode.classList.add("nav");
                 mainNav.appendChild(ulNode);
             }
             (links) && links.forEach(function(link) {
                 var liNode=doc.createElement("li");
-                if (link.active) {
-                    liNode.classList.add("active");
-                    liNode.classList.add("nav-active");
-                } else {
-                    liNode.classList.remove("active");
-                    liNode.classList.remove("nav-active");
-                }
+                liNode.classList.add("nav-item");
                 ulNode.appendChild(liNode);
+                var aNode=doc.createElement("a");
+                aNode.href=link.url;
+                aNode.classList.add("nav-link");
+                if (link.active) {
+                    aNode.classList.add("active");
+                    //aNode.classList.add("nav-active");
+                } else {
+                    aNode.classList.remove("active");
+                    //aNode.classList.remove("nav-active");
+                }
                 if (link.icon) {
                     var iconNode=doc.createElement("span");
                     iconNode.classList.add("glyphicon");
                     iconNode.classList.add("glyphicon-"+link.icon);
-                    liNode.appendChild(iconNode);
+                    aNode.appendChild(iconNode);
                 }
-                var aNode=doc.createElement("a");
-                aNode.href=link.url;
                 aNode.appendChild(doc.createTextNode(link.title || link.url));
                 j$(aNode).click(function onLinkClicked(evt) {
                     evt.preventDefault();
-                    win.navigationController.pushURL(this.href);
+                    var url=this.getAttribute("href");
+                    win.navigationController.pushURL(url);
                     return false;
                 });
                 liNode.appendChild(aNode);
@@ -97,7 +146,7 @@ var TwinTron=window.TwinTron || {};
             this.mainNav=mainNav;
             j$(this.mainNav).show();
 
-            console.log("TwinTron Web App initialized");
+            console.log("TwinTron Web Page initialized");
         }
     };
     TwinTron.WebApp=TwinTron_WebApp;

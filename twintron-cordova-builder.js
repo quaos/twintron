@@ -140,6 +140,17 @@ TwinTron_CordovaBuilder.prototype={
                 });
             })
             .then(function() {
+                var mainJsFile=config.mainJsFile || "twintron.cordova.js";
+                //var mainJsPath=path.join("src",mainJsFile);
+                var mainJsBundleFile=config.mainJsFile || "twintron.cordova.bundle.js";
+                var mainJsBundlePath=path.join(destDir,"assets","js",mainJsBundleFile);
+                
+                console.log("Compiling sources & dependency JS files");
+                var cmd="browserify";
+                var cmdArgs=[ mainJsFile, "-o", mainJsBundlePath ];
+                return utils.exec(cmd,cmdArgs,destDir);
+            })
+            .then(function() {
                 var cmd="cordova";
                 var cmdArgs=[ "build" ];
                 return utils.exec(cmd,cmdArgs,destDir);
@@ -153,9 +164,25 @@ TwinTron_CordovaBuilder.prototype={
         var builder=this;
         var modDir=__dirname;
         var workDir=this.opts.workDir || process.cwd();
+        var destDir=path.join(workDir,"cordova");
         
         //TODO:
         throw new Error("Not implemented yet");
+        
+        var config=this.opts;
+        return fs.readJson(path.join(workDir,"package.json"))
+            .then(function(packageObj) {
+                (packageObj.cordova) && utils.merge(config, packageObj.cordova);
+                var appName=config.appName || packageObj.name;
+                var bundleID=config.bundleID || "quaos.twintron.template";
+                
+                var cmd="cordova";
+                var cmdArgs=[ "run" ];
+                (args) && args.forEach(function(arg) {
+                    cmdArgs.push(arg);
+                });
+                return utils.exec(cmd,cmdArgs,destDir);
+            });
     }
 };
 

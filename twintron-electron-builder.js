@@ -7,15 +7,21 @@ var utils=require("./q-utils");
 function TwinTron_ElectronBuilder(opts) {
     this.opts=opts || {};
 }
+utils.merge(TwinTron_ElectronBuilder, {
+    //statics
+    DEFAULT_ELECTRON_VERSION: "1.7.9"
+});
 TwinTron_ElectronBuilder.prototype={
     constructor: TwinTron_ElectronBuilder,
     opts: null,
     
     init: function(args) {
+        var _static=TwinTron_ElectronBuilder;
         var builder=this;
         var modDir=__dirname;
         var tmplDir=path.join(__dirname,"templates","electron");
         var workDir=this.opts.workDir || process.cwd();
+        var webDir=path.join(workDir,"www");
         var destDir=path.join(workDir,"electron");
         
         var config=this.opts;
@@ -46,7 +52,7 @@ TwinTron_ElectronBuilder.prototype={
                     }*/
                     var destPath=path.join(destDir2,fName);
                     
-                    console.log("Copying: "+srcPath+" ["+srcExt+"] -> "+destPath);
+                    console.log("Copying: "+srcPath+" -> "+destPath);
                     proms.push(fs.ensureDir(destDir2)
                         .then(function() {
                             return fs.copy(srcPath,destPath, {
@@ -57,9 +63,18 @@ TwinTron_ElectronBuilder.prototype={
                 });
             })
             .then(function() {
-                //Step 1: Copy template files
+                //Step 2: Copy template files
                 console.log("Copying files from source path: "+tmplDir+" -> "+destDir);
                 return utils.copyTree(tmplDir,destDir,function(fName) {
+                    var included=true; //(excludedFiles.indexOf(fName) < 0);
+                    (included) && console.log("Copying: "+fName);
+                    return included;
+                });
+            })
+            .then(function() {
+                //Step 3: Copy web files
+                console.log("Copying files from source path: "+webDir+" -> "+destDir);
+                return utils.copyTree(webDir,destDir,function(fName) {
                     var included=true; //(excludedFiles.indexOf(fName) < 0);
                     (included) && console.log("Copying: "+fName);
                     return included;
@@ -71,36 +86,57 @@ TwinTron_ElectronBuilder.prototype={
             }); 
     },
     build: function(args) {
+        var _static=TwinTron_ElectronBuilder;
         var builder=this;
         var modDir=__dirname;
         //var tmplDir=path.join(__dirname,"templates","electron");
         var workDir=this.opts.workDir || process.cwd();
-        var srcDir=path.join(workDir,"www");
+        var srcDir=path.join(workDir,"src");
+        var webDir=path.join(workDir,"www");
         var destDir=path.join(workDir,"electron");
-        var excludedFiles=[ "package.json" ];
+        var platform=(args.length >= 1) ? args[0] : null;
+        var arch=(args.length >= 2) ? args[1] : null;
         
         var config=this.opts;
+        var appName;
         return fs.readJson(path.join(workDir,"package.json"))
             .then(function(packageObj) {
                 (packageObj.electron) && utils.merge(config, packageObj.electron);
-                var appName=config.appName || packageObj.name;
+                appName=config.appName || packageObj.name;
                 
                 console.log("Building electron app: "+appName);
-                console.log("Copying files from source path: "+srcDir+" -> "+destDir);
-                return utils.copyTree(srcDir,destDir,function(fName) {
+                console.log("Copying files from source path: "+webDir+" -> "+destDir);
+                var excludedFiles=[ ".gitignore", "package.json" ];
+                return utils.copyTree(webDir,destDir,function(fName) {
                     var included=(excludedFiles.indexOf(fName) < 0);
                     (included) && console.log("Copying: "+fName);
                     return included;
                 });
             })
+            /*.then(function() {
+                var mainJsFile=config.mainJsFile || "main.js";
+                //var mainJsPath=path.join("src",mainJsFile);
+                var mainJsBundleFile=config.mainJsFile || "main-bundle.js";
+                var mainJsBundlePath=path.join(destDir,"assets","js",mainJsBundleFile);
+                
+                console.log("Compiling sources & dependency JS files");
+                var cmd="browserify";
+                var cmdArgs=[ mainJsFile, "-o", mainJsBundlePath ];
+                return utils.exec(cmd,cmdArgs,srcDir);
+            })*/
             .then(function() {
                 var cmd="npm";
                 var cmdArgs=[ "install" ];
                 return utils.exec(cmd,cmdArgs,destDir);
             })
             .then(function() {
-                var cmd="ebuild";
-                var cmdArgs=[ "." ];
+                var cmd="electron-packager";
+                var cmdArgs=[ ".", appName, "--ignore=\\.gitignore" ];
+                (platform) && cmdArgs.push("--platform="+platform);
+                (arch) && cmdArgs.push("--arch="+arch);
+                var rtVersion=config.electronVersion || _static.DEFAULT_ELECTRON_VERSION;
+                (rtVersion) && cmdArgs.push("--electron-version="+rtVersion);
+                cmdArgs.push("--out=./build");
                 return utils.exec(cmd,cmdArgs,destDir);
             })
             .then(function() {
@@ -118,7 +154,13 @@ TwinTron_ElectronBuilder.prototype={
         var cmd="electron";
         var cmdArgs=[ "." ];
         return utils.exec(cmd,cmdArgs,destDir);
+    },
+    
+    //TODO: Revise this later {
+    prebuild: function(config) {
+        
     }
+    // }
 };
 
 function TwinTron_ElectronBuilder$Factory(opts) {

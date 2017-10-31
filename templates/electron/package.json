@@ -1,11 +1,12 @@
 {
   "name": "twintron-electron",
+  "productName": "twintron-electron",
   "version": "1.0.0",
   "description": "A minimal Electron application",
   "main": "twintron-main.electron.js",
   "scripts": {
     "start": "electron .",
-    "dist": "ebuild ."
+    "dist": "electron-packager ."
   },
   "keywords": [
     "Electron",
@@ -17,6 +18,10 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "dependencies": {
-    "fs-extra": "^4.0.2"
+    "fs-extra": "^4.0.2",
+    "universalify": "^0.1.1"
+  },
+  "devDependencies": {
+    "electron": "^1.4.15"
   }
 }

@@ -41,12 +41,26 @@
                 <p class="event listening">Connecting to Device</p>
                 <p class="event received">Device is Ready</p>
             </div>
-            <iframe id="mainContainer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+            <iframe id="mainContainer" style="position: absolute; top: 2em; left: 0; width: 100%; height: 100%;">
             </iframe>
         </div>
         <script type="text/javascript" src="cordova.js"></script>
         <script src="assets/js/jquery-3.2.1.slim.min.js"></script>
         <script type="text/javascript" src="assets/js/q-require.js"></script>
-        <script type="text/javascript" src="assets/js/twintron.cordova.js"></script>
+        <script type="text/javascript">
+        //Namespaces
+        var TwinTron=TwinTron || {};
+        </script>
+        <script type="text/javascript" src="assets/js/twintron.cordova.bundle.js"></script>
+        <script type="text/javascript">
+        (function(doc,win,j$) {
+            var app=new TwinTron.CordovaApp({
+                document: doc,
+                window: win,
+                jQuery: j$
+            });
+            doc.addEventListener("DOMContentLoaded", app.initialize.bind(app));
+        })(document,window,jQuery.noConflict(true));
+        </script>
     </body>
 </html>
