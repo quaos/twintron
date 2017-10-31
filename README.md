@@ -60,6 +60,7 @@ TwinTron (tools part & app templates part) utilizes 3rd-party libraries/products
 * [Electron](https://electron.atom.io/)
 * [Electron Packager](https://www.npmjs.com/package/electron-packager)
 * [Apache Cordova](https://cordova.apache.org/)
+* [Browserify](https://www.npmjs.com/package/browserify)
 * [Bootstrap](http://getbootstrap.com/)
 * [Glyphicons](https://glyphicons.com/)
 
