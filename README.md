@@ -2,7 +2,7 @@
 A minimalistic Framework & Build tool for deploying HTML5+JS Web App to Electron & Cordova
 (Work in progress)
 
-##How to Use
+## How to Use
 
 To initialize a project with web app structure:
 ````
@@ -54,7 +54,7 @@ cd {yourprojectdir}
 twintron web run
 ````
 
-##Notes
+## Notes
 TwinTron (tools part & app templates part) utilizes 3rd-party libraries/products such as:
 
 * [Electron](https://electron.atom.io/)
