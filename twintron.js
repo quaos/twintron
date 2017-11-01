@@ -15,6 +15,36 @@ TwinTron_Storage.prototype={
 };
 TwinTron.Storage=TwinTron_Storage;
 
+function TwinTron_Extension(opts) {
+};
+utils.merge(TwinTron_Extension, {
+    //statics
+    registry: {},
+    
+    get: function(name) {
+        return TwinTron_Extension.registry[name];
+    },
+    register: function(ext) {
+        TwinTron_Extension.registry[ext.name]=ext;
+    },
+    unregister: function(ext) {
+        (TwinTron_Extension.registry[ext.name] === ext) && (TwinTron_Extension.registry[ext.name] = undefined);
+    }
+});
+TwinTron_Extension.prototype={
+    name: null,
+    version: null,
+    description: null,
+    author: null,
+    
+    on: function(evtID,callback) { throw new Error("Not implemented"); },
+    off: function(evtID,callback) { throw new Error("Not implemented"); },
+    once: function(evtID,callback) { throw new Error("Not implemented"); },
+    init: function() { throw new Error("Not implemented"); },
+    cleanup: function() { throw new Error("Not implemented"); }
+};
+TwinTron.Extension=TwinTron_Extension;
+
 function TwinTron_NavigationLink(opts) {
     //TODO:
     if (opts) {

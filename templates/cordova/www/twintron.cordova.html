@@ -51,6 +51,7 @@
         //Namespaces
         var TwinTron=TwinTron || {};
         </script>
+        <script type="text/javascript" src="assets/js/main-bundle.js"></script>
         <script type="text/javascript" src="assets/js/twintron.cordova.bundle.js"></script>
         <script type="text/javascript">
         (function(doc,win,j$) {
@@ -59,7 +60,7 @@
                 window: win,
                 jQuery: j$
             });
-            doc.addEventListener("DOMContentLoaded", app.initialize.bind(app));
+            doc.addEventListener("DOMContentLoaded", app.initApp.bind(app));
         })(document,window,jQuery.noConflict(true));
         </script>
     </body>

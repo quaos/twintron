@@ -17,30 +17,51 @@ TwinTron_CordovaBuilder.prototype={
         var modDir=__dirname;
         var tmplDir=path.join(__dirname,"templates","cordova");
         var workDir=this.opts.workDir || process.cwd();
+        var webDir=path.join(workDir,"www");
         var destDir=path.join(workDir,"cordova");
+        var destWebDir=path.join(destDir,"www");
         var mainPageFile="twintron.cordova.html";
         var cordovaConfPath=path.join(destDir,"config.xml");
+        var platform=(args) ? args.shift() : null;
         
         var config=this.opts;
         return fs.readJson(path.join(workDir,"package.json"))
             .then(function(packageObj) {
-                //Step 1: Cordova create
                 (packageObj.cordova) && utils.merge(config, packageObj.cordova);
                 var appName=config.appName || packageObj.name;
                 var bundleID=config.bundleID || "quaos.twintron.template";
                 (config.mainPageFile) && (mainPageFile=config.mainPageFile);
         
-                console.log("Initializing cordova app: "+appName+"; bundle ID: "+bundleID);
-                var cmd="cordova";
-                var cmdArgs=["create","cordova",bundleID,appName];
-                return utils.exec(cmd,cmdArgs,workDir);
+                //Step 1: Cordova create (if not existing project)
+                console.log("Initializing Cordova app: "+appName+"; bundle ID: "+bundleID);
+                return fs.pathExists(cordovaConfPath)
+                    .then(function(exists) {
+                        if (exists) {
+                            //Skip
+                            console.log("Detected existing Cordova config file, skipping create");
+                            return Promise.resolve(true);
+                        }
+                        var cmd="cordova";
+                        var cmdArgs=["create","cordova",bundleID,appName];
+                        return utils.exec(cmd,cmdArgs,workDir);
+                    });
             })
             .then(function() {
-                //Step 2: Copy template files
+                //Step 2A: Add platform
+                if (!platform) {
+                    return Promise.resolve(null);
+                }
+                var cmd="cordova";
+                var cmdArgs=[ "platform","add",platform ];
+                return utils.exec(cmd,cmdArgs,destDir);
+                
+            })
+            .then(function() {
+                //Step 3: Copy template files
                 return fs.ensureDir(destDir)
                     .then(function() {
-                        var excludedFiles=[ ".git", ".gitignore", "package.json" ];
                         console.log("Copying files from source path: "+tmplDir+" -> "+destDir);
+                        var excludedFiles=[ ".git", ".gitignore", "package.json", "package-lock.json" ];
                         return utils.copyTree(tmplDir,destDir,function(fName) {
                             var included=(excludedFiles.indexOf(fName) < 0);
                             (included) && console.log("Copying: "+fName);
@@ -49,25 +70,21 @@ TwinTron_CordovaBuilder.prototype={
                     });
             })
             .then(function() {
-                //Step 3: Copy dependency files to web dir
+                //Step 4: Copy web files
+                return builder.prebuild(config);
+            })
+            .then(function() {
+                //Step 5: Copy dependency files to target src dir
                 var depsFiles=[ "twintron.js", "q-utils.js" ];
                 console.log("Copying dependency files from source path: "+modDir);
                 var proms=[];
                 depsFiles.forEach(function(fName) {
                     var srcPath=path.join(modDir,fName);
-                    var srcExt=path.extname(fName);
-                    var destDir2=destDir;
-                    if ((!srcExt) && (srcExt !== 0)) {
-                    } else if (srcExt === ".js") {
-                        destDir2=path.join(destDir,"www","assets","js");
-                    } else if (srcExt === ".css") {
-                        destDir2=path.join(destDir,"www","assets","css");
-                    } else if (srcExt.match(/^\.(png|jpg|jpeg|gif|tif|tiff|svg|ico)$/i)) {
-                        destDir2=path.join(destDir,"www","assets","img");
-                    }
+                    //var srcExt=path.extname(fName);
+                    var destDir2=path.join(destDir,"src");
                     var destPath=path.join(destDir2,fName);
                     
-                    console.log("Copying: "+srcPath+" ["+srcExt+"] -> "+destPath);
+                    console.log("Copying: "+srcPath+" -> "+destPath);
                     proms.push(fs.ensureDir(destDir2)
                         .then(function() {
                             return fs.copy(srcPath,destPath, {
@@ -78,7 +95,7 @@ TwinTron_CordovaBuilder.prototype={
                 });
             })
             .then(function() {
-                //Step 4: Parse & modify some parameters in Cordova config.xml        
+                //Step 5: Parse & modify some parameters in Cordova config.xml        
                 var xmlParser = new xml2js.Parser();
                 var xmlBuilder = new xml2js.Builder();
 
@@ -120,9 +137,9 @@ TwinTron_CordovaBuilder.prototype={
         var modDir=__dirname;
         //var tmplDir=path.join(__dirname,"templates","cordova");
         var workDir=this.opts.workDir || process.cwd();
-        var srcDir=path.join(workDir,"www");
-        var destDir=path.join(workDir,"cordova");
-        var excludedFiles=[ ".git", ".gitignore", "package.json" ];
+        var srcDir=path.join(workDir,"src");
+        var webDir=path.join(workDir,"www");
+        var destDir=path.join(workDir,"cordova", "www");
         
         var config=this.opts;
         return fs.readJson(path.join(workDir,"package.json"))
@@ -131,15 +148,12 @@ TwinTron_CordovaBuilder.prototype={
                 var appName=config.appName || packageObj.name;
                 var bundleID=config.bundleID || "quaos.twintron.template";
                 
+                //Step 1: Copy web files
                 console.log("Building cordova app: "+appName+"; bundle ID: "+bundleID);
-                console.log("Copying files from source path: "+srcDir+" -> "+destDir);
-                return utils.copyTree(srcDir,destDir,function(fName) {
-                    var included=(excludedFiles.indexOf(fName) < 0);
-                    (included) && console.log("Copying: "+fName);
-                    return (included);
-                });
+                return builder.prebuild(config);
             })
             .then(function() {
+                //Step 2: Compile source files
                 var mainJsFile=config.mainJsFile || "twintron.cordova.js";
                 //var mainJsPath=path.join("src",mainJsFile);
                 var mainJsBundleFile=config.mainJsFile || "twintron.cordova.bundle.js";
@@ -148,11 +162,14 @@ TwinTron_CordovaBuilder.prototype={
                 console.log("Compiling sources & dependency JS files");
                 var cmd="browserify";
                 var cmdArgs=[ mainJsFile, "-o", mainJsBundlePath ];
-                return utils.exec(cmd,cmdArgs,destDir);
+                return utils.exec(cmd,cmdArgs,srcDir);
             })
             .then(function() {
                 var cmd="cordova";
                 var cmdArgs=[ "build" ];
+                (args) && args.forEach(function(arg) {
+                    cmdArgs.push(arg);
+                });
                 return utils.exec(cmd,cmdArgs,destDir);
             })
             .then(function() {
@@ -166,9 +183,6 @@ TwinTron_CordovaBuilder.prototype={
         var workDir=this.opts.workDir || process.cwd();
         var destDir=path.join(workDir,"cordova");
         
-        //TODO:
-        throw new Error("Not implemented yet");
-        
         var config=this.opts;
         return fs.readJson(path.join(workDir,"package.json"))
             .then(function(packageObj) {
@@ -181,9 +195,28 @@ TwinTron_CordovaBuilder.prototype={
                 (args) && args.forEach(function(arg) {
                     cmdArgs.push(arg);
                 });
-                return utils.exec(cmd,cmdArgs,destDir);
+                return utils.exec(cmd,cmdArgs,destDir,process.env);
             });
+    },
+    
+    //TODO: Revise this later {
+    prebuild: function(config) {
+         var _static=TwinTron_CordovaBuilder;
+        var builder=this;
+        var modDir=__dirname;
+        var workDir=this.opts.workDir || process.cwd();
+        var webDir=path.join(workDir,"www");
+        var destDir=path.join(workDir,"cordova","www");
+        
+        console.log("Copying files from source path: "+webDir+" -> "+destDir);
+        var excludedFiles=[ ".git", ".gitignore", "package.json", "package-lock.json" ];
+        return utils.copyTree(webDir,destDir,function(fName) {
+            var included=(excludedFiles.indexOf(fName) < 0);
+            (included) && console.log("Copying: "+fName);
+            return included;
+        });
     }
+    // }
 };
 
 function TwinTron_CordovaBuilder$Factory(opts) {

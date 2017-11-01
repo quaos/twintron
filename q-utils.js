@@ -69,10 +69,11 @@ var utils={
             });
     },
     
-    exec: function(cmd,args,workDir) {
+    exec: function(cmd,args,workDir,env) {
         var child_process=require("child_process");
         var cmdOpts={
             cwd: workDir,
+            env: env,
             stdio: "inherit"
         };
         console.log("> "+cmd+" "+args.join(" "));

@@ -42,16 +42,22 @@ twintron cordova build
 ````
 
 
+To test run web app on a minimal HTTP server:
+````
+cd {yourprojectdir}
+twintron web run
+````
+
 To test run electron app:
 ````
 cd {yourprojectdir}
 twintron electron run
 ````
 
-To test run web app on a minimal HTTP server:
+To test run cordova app:
 ````
 cd {yourprojectdir}
-twintron web run
+twintron cordova run [ other args ]
 ````
 
 ## Notes
