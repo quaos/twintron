@@ -30,12 +30,12 @@
     <script type="text/javascript" src="assets/js/main-bundle.js"></script>
     <script type="text/javascript">
     (function(doc,win,j$) {
-        var app=new TwinTron.WebApp({
+        var page=new TwinTron.WebPageController({
             document: doc,
             window: win,
             jQuery: j$
         });
-        doc.addEventListener("DOMContentLoaded", app.initPage.bind(app));
+        doc.addEventListener("DOMContentLoaded", page.init.bind(page));
     })(document,window,jQuery.noConflict(true));
     </script>
   </body>

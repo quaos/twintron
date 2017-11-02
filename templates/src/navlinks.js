@@ -1,6 +1,14 @@
 
-module.exports=function(TwinTron,navCtrl) {
-    return {
+module.exports = [
+    { title: "Home", icon: "home", url: "home.html" },
+    { title: "About", icon: "info-sign", url: "about.html" }
+];
+
+
+
+
+/*function(TwinTron,navCtrl) {
+return {
         init: function navlinks_init() {
             //Initialize links in our web app
             console.log("Adding navigation links");
@@ -16,5 +24,6 @@ module.exports=function(TwinTron,navCtrl) {
         }
     };
 };
+*/
 
                         

@@ -49,11 +49,9 @@ var TwinTron=window.TwinTron || {};
         }
     }, TwinTron_StorageImpl_Cordova_static);
     
-    function TwinTron_StorageImpl_Cordova$Factory(opts) {
+    TwinTron.Storage=utils.makeFactory(TwinTron_StorageImpl_Cordova, function TwinTron_StorageImpl_Cordova$Factory(opts) {
        return new TwinTron_StorageImpl_Cordova(opts);
-    };
-    _deps.utils.makeFactory(TwinTron_StorageImpl_Cordova, TwinTron_StorageImpl_Cordova$Factory);
-    TwinTron.Storage=TwinTron_StorageImpl_Cordova$Factory;
+    });
 
     function TwinTron_CordovaApp(opts) {
         TwinTron_CordovaApp._super.prototype.constructor.call(this,opts);
@@ -77,7 +75,7 @@ var TwinTron=window.TwinTron || {};
         mainContainer: null,
 
         // Application Constructor
-        initApp: function() {
+        init: function() {
             var _static=TwinTron_CordovaApp;
             var app=this;
             var win=this.window;

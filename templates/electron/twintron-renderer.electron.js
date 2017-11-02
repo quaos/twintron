@@ -22,8 +22,8 @@ var TwinTron_ElectronWebApp_static={
 TwinTron_ElectronWebApp.prototype=utils.extendClass(TwinTron.WebApp, {
     constructor: TwinTron_ElectronWebApp,
     
-    initApp: function() {
-        this._super.prototype.initApp.call(this);
+    init: function() {
+        this._super.prototype.init.call(this);
         
         var _static=TwinTron_ElectronWebApp;
         var app=this;

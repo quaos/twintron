@@ -2,26 +2,28 @@
 //Global namespaces
 var TwinTron=window.TwinTron || {};
 
-(function TwinTron_WebApp$Closure() {
+(function(win,doc,j$) {
     var utils=require("./q-utils");
     var _twintron=require("./twintron");
     utils.merge(TwinTron, _twintron, true);
-    var navlinks=require("./navlinks");
-
-    /*return require("./q-utils", true)
-        .then(function(utils) {
-            _deps.utils=utils;
-            return require("./twintron", true);
-        })
-        .then(function(twintron) {
-            _deps.TwinTron=twintron;
-            _deps.utils.merge(TwinTron,twintron);
-            return require("./navlinks", true);
-        })
-        .then(function(navlinks) {
-            _deps.navlinks=navlinks;
-    */
-
+    
+    var navLinks=require("./navlinks");
+    var app=new TwinTron.WebApp({
+        document: doc,
+        window: win,
+        jQuery: j$,
+        navigationLinks: navLinks
+    });
+    doc.addEventListener("DOMContentLoaded", function onPageReady() {
+        app.init()
+            .then(function() {
+                app.navigationController.pushURL("home.html");
+            });
+    }); 
+})(window,document,jQuery.noConflict(true));
+        
+    //REFACTORED: Moved to TwinTron.WebApp class {
+    /*
     function TwinTron_WebApp(opts) {
         this.opts=opts || {};
         if (opts) {
@@ -39,7 +41,10 @@ var TwinTron=window.TwinTron || {};
         mainContainer: null,
         mainNav: null,
 
-        initApp: function() {
+
+        //REFACTORED: Moved to TwinTron.RootPageController class {
+        /*
+        init: function() {
             var app=this;
             var doc=this.document;
             var win=this.window;
@@ -87,8 +92,11 @@ var TwinTron=window.TwinTron || {};
             
             j$(mainContainer).show();
             navCtrl.pushURL("home.html");
-        },
-        
+        }
+        * /
+       
+        //REFACTORED: Moved to TwinTron.WebPageController class {
+        /*,
         initPage: function() {
             var app=this;
             var doc=this.document;
@@ -108,48 +116,52 @@ var TwinTron=window.TwinTron || {};
             
             //Initialize nav UI
             var mainNav=doc.getElementById("mainNav");
-            var ulNode=mainNav.querySelector("ul");
-            if (!ulNode) {
-                ulNode=doc.createElement("ul");
-                ulNode.classList.add("nav");
-                mainNav.appendChild(ulNode);
-            }
-            (links) && links.forEach(function(link) {
-                var liNode=doc.createElement("li");
-                liNode.classList.add("nav-item");
-                ulNode.appendChild(liNode);
-                var aNode=doc.createElement("a");
-                aNode.href=link.url;
-                aNode.classList.add("nav-link");
-                if (link.active) {
-                    aNode.classList.add("active");
-                    //aNode.classList.add("nav-active");
-                } else {
-                    aNode.classList.remove("active");
-                    //aNode.classList.remove("nav-active");
+            if (mainNav) {
+                var ulNode=mainNav.querySelector("ul");
+                if (!ulNode) {
+                    ulNode=doc.createElement("ul");
+                    ulNode.classList.add("nav");
+                    mainNav.appendChild(ulNode);
                 }
-                if (link.icon) {
-                    var iconNode=doc.createElement("span");
-                    iconNode.classList.add("glyphicon");
-                    iconNode.classList.add("glyphicon-"+link.icon);
-                    aNode.appendChild(iconNode);
-                }
-                aNode.appendChild(doc.createTextNode(link.title || link.url));
-                j$(aNode).click(function onLinkClicked(evt) {
-                    evt.preventDefault();
-                    var url=this.getAttribute("href");
-                    win.navigationController.pushURL(url);
-                    return false;
+                (links) && links.forEach(function(link) {
+                    var liNode=doc.createElement("li");
+                    liNode.classList.add("nav-item");
+                    ulNode.appendChild(liNode);
+                    var aNode=doc.createElement("a");
+                    aNode.href=link.url;
+                    aNode.classList.add("nav-link");
+                    if (link.active) {
+                        aNode.classList.add("active");
+                        //aNode.classList.add("nav-active");
+                    } else {
+                        aNode.classList.remove("active");
+                        //aNode.classList.remove("nav-active");
+                    }
+                    if (link.icon) {
+                        var iconNode=doc.createElement("span");
+                        iconNode.classList.add("glyphicon");
+                        iconNode.classList.add("glyphicon-"+link.icon);
+                        aNode.appendChild(iconNode);
+                    }
+                    aNode.appendChild(doc.createTextNode(link.title || link.url));
+                    j$(aNode).click(function onLinkClicked(evt) {
+                        evt.preventDefault();
+                        var url=this.getAttribute("href");
+                        win.navigationController.pushURL(url);
+                        return false;
+                    });
+                    liNode.appendChild(aNode);
                 });
-                liNode.appendChild(aNode);
-            });
-            this.mainNav=mainNav;
-            j$(this.mainNav).show();
+                this.mainNav=mainNav;
+                j$(this.mainNav).show();
+            }
 
             console.log("TwinTron Web Page initialized");
         }
+        * /
+       // }
     };
     TwinTron.WebApp=TwinTron_WebApp;
+    */
+   // }
     
-    return TwinTron_WebApp;
-})();

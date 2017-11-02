@@ -30,15 +30,18 @@
     var TwinTron=TwinTron || {};
     </script>
     <script type="text/javascript" src="assets/js/main-bundle.js"></script>
+    <!--
+    REFACTORED: Moved this part to src/main.js
     <script type="text/javascript">
     (function(doc,win,j$) {
-        var app=new TwinTron.WebApp({
+        var rootPage=new TwinTron.RootPageController({
             document: doc,
             window: win,
             jQuery: j$
         });
-        doc.addEventListener("DOMContentLoaded", app.initApp.bind(app));
+        doc.addEventListener("DOMContentLoaded", rootPage.init.bind(rootPage));
     })(document,window,jQuery.noConflict(true));
     </script>
+    -->
   </body>
 </html>

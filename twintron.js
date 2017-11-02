@@ -140,10 +140,233 @@ TwinTron_NavigationController.prototype={
         });
     }
 };
-function TwinTron_NavigationController$Factory(opts) {
+TwinTron.NavigationController=TwinTron_NavigationController;
+/*TwinTron.NavigationController=utils.makeFactory(TwinTron_NavigationController, function TwinTron_NavigationController$Factory(opts) {
     return new TwinTron_NavigationController(opts);
-}
-utils.makeFactory(TwinTron_NavigationController, TwinTron_NavigationController$Factory);
-TwinTron.NavigationController=TwinTron_NavigationController$Factory;
+});*/
+
+function TwinTron_WebPageController(opts) {
+    this.opts=opts || {};
+    if (opts) {
+        this.document=opts.document || document;
+        this.window=opts.window || window;
+        this.jQuery=opts.jQuery || jQuery;
+    }
+};
+TwinTron_WebPageController.prototype={
+    constructor: TwinTron_WebPageController,
+    
+    opts: null,
+    document: null,
+    window: null,
+    jQuery: null,
+    
+    navigationController: null,
+    mainNav: null,
+
+    init: function() {
+        var app=this;
+        var doc=this.document;
+        var win=this.window;
+        var j$=this.jQuery;
+
+        var navCtrl=win.navigationController;
+        //Attach navigation controller
+        if ((!navCtrl) && (win.parent)) {
+            console.log("Inherited navigation controller from parent: "+win.parent.location.href);
+            navCtrl=win.parent.navigationController;
+        }
+        if (!navCtrl) {
+            console.warn("No navigation controller available");
+        }
+        this.navigationController=navCtrl;
+        
+        //Initialize nav UI
+        var proms=[];
+        var mainNav=doc.getElementById("mainNav");
+        if (mainNav) {
+            var ulNode=mainNav.querySelector("ul");
+            if (!ulNode) {
+                ulNode=doc.createElement("ul");
+                ulNode.classList.add("nav");
+                mainNav.appendChild(ulNode);
+            }
+            var links=(navCtrl) ? navCtrl.links : null;
+            (links) && links.forEach(function(link) {
+                var liNode=doc.createElement("li");
+                liNode.classList.add("nav-item");
+                ulNode.appendChild(liNode);
+                var aNode=doc.createElement("a");
+                aNode.href=link.url;
+                aNode.classList.add("nav-link");
+                if (link.active) {
+                    aNode.classList.add("active");
+                    //aNode.classList.add("nav-active");
+                } else {
+                    aNode.classList.remove("active");
+                    //aNode.classList.remove("nav-active");
+                }
+                if (link.icon) {
+                    var iconNode=doc.createElement("span");
+                    iconNode.classList.add("glyphicon");
+                    iconNode.classList.add("glyphicon-"+link.icon);
+                    aNode.appendChild(iconNode);
+                }
+                aNode.appendChild(doc.createTextNode(link.title || link.url));
+                j$(aNode).click(function onLinkClicked(evt) {
+                    evt.preventDefault();
+                    var url=this.getAttribute("href");
+                    win.navigationController.pushURL(url);
+                    return false;
+                });
+                liNode.appendChild(aNode);
+                proms.push(Promise.resolve(liNode));
+            });
+            this.mainNav=mainNav;
+            j$(this.mainNav).show();
+        }
+        return Promise.all(proms)
+            .then(function(results) {
+                console.log("TwinTron Web Page initialized");
+                return Promise.resolve(true);
+            });
+    }
+};
+TwinTron.WebPageController=TwinTron_WebPageController;
+/*TwinTron.WebPageController=utils.makeFactory(TwinTron_WebPageController, function TwinTron_WebPageController$Factory(opts) {
+    return new TwinTron_WebPageController(opts);
+});*/
+
+
+function TwinTron_RootPageController(opts) {
+    TwinTron_RootPageController._super.prototype.constructor.call(this,opts);
+    this.navLinks=[];
+    if (opts) {
+        (opts.navigationLinks) && this.addLinks(opts.navigationLinks);
+    }
+};
+var TwinTron_RootPageController_static={
+    //statics
+};
+TwinTron_RootPageController.prototype=utils.extendClass(TwinTron_WebPageController, {
+    constructor: TwinTron_RootPageController,
+    
+    mainContainer: null,
+    navLinks: null,
+    
+    addLinks: function(links) {
+        var page=this;
+        (links) && links.forEach(function(link) {
+            page.addLink(link);
+        });
+    },
+    addLink: function(link) {
+        console.log("Adding navigation link to root page: "+link.url+" ["+link.title+"]");
+        this.navLinks.push(link);
+    },
+    
+    init: function() {
+        var page=this;
+        var doc=this.document;
+        var win=this.window;
+        var j$=this.jQuery;
+        var opts=this.opts;
+        var mainContainer=this.mainContainer;
+
+        var navCtrl=win.navigationController;
+        if (!navCtrl) {
+            console.warn("Creating navigation controller for root page");
+            navCtrl=new TwinTron.NavigationController({
+                links: page.navLinks
+            });
+            navCtrl.on(TwinTron.NavigationController.EVT_LINK, function TwinTron_RootPageController_onLink(evt) {
+                console.log("Navigating to: "+evt.url);
+                mainContainer.src=evt.url;
+            });
+            win.navigationController=navCtrl;
+        }
+        this.navigationController=navCtrl;
+        
+        return TwinTron_RootPageController._super.prototype.init.call(this)
+            .then(function(proceed) {
+                if (!proceed) {
+                    return Promise.reject(false);
+                }
+                
+                mainContainer=this.document.getElementById("mainContainer");
+                j$(mainContainer).hide();
+                //mainContainer.src="home.html";
+                mainContainer.contentWindow.width=win.clientWidth;
+                mainContainer.contentWindow.height=win.clientHeight-mainContainer.offsetTop; //win.clientTop;
+                this.mainContainer=mainContainer;
+
+                //var links=navCtrl.links;
+                //TEST {
+                //console.log(links);
+                // }
+                /*if ((!links) || (links.length <= 0)) {
+                    links=navlinks(TwinTron,navCtrl).init();
+                }*/
+
+                function onMainContainerLoaded() {
+                    console.log("Attaching navigation controller to container: "+mainContainer.contentWindow.location.href);
+                    mainContainer.contentWindow.navigationController=navCtrl;
+                };
+                //j$(mainContainer).load(onMainContainerLoaded);
+                mainContainer.onreadystatechange=function() {
+                    (mainContainer.readyState === "complete") && onMainContainerLoaded();
+                };
+                mainContainer.onload=onMainContainerLoaded;
+                //mainContainer.contentWindow.onload=onMainContainerLoaded;
+                //mainContainer.contentWindow.navigationController=navCtrl;
+
+                console.log("TwinTron Web App initialized");
+
+                j$(mainContainer).show();
+                //navCtrl.pushURL("home.html");
+
+                console.log("TwinTron Root Page initialized");
+            });
+    }
+}, TwinTron_RootPageController_static);
+TwinTron.RootPageController=TwinTron_RootPageController;
+
+function TwinTron_WebApp(opts) {
+    this.opts=opts || {};
+    if (opts) {
+        this.document=opts.document || document;
+        this.window=opts.window || window;
+        this.jQuery=opts.jQuery || jQuery;
+    }
+    this.rootPageController=new TwinTron.RootPageController(opts);
+};
+TwinTron_WebApp.prototype={
+    constructor: TwinTron_WebApp,
+    
+    opts: null,
+    document: null,
+    window: null,
+    jQuery: null,
+    
+    rootPageController: null,
+    navigationController: null,
+
+    init: function() {
+        var app=this;
+        var doc=this.document;
+        var win=this.window;
+        var j$=this.jQuery;
+
+        return this.rootPageController.init()
+            .then(function(result) {
+                app.navigationController=app.rootPageController.navigationController;
+                return Promise.resolve(result);
+            })
+            .catch(function(err) {
+                console.error(err.message || err);
+            });
+    }
+};
+TwinTron.WebApp=TwinTron_WebApp;
 
 module.exports=TwinTron;
