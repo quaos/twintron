@@ -81,11 +81,11 @@ TwinTron_CordovaBuilder.prototype={
                 depsFiles.forEach(function(fName) {
                     var srcPath=path.join(modDir,fName);
                     //var srcExt=path.extname(fName);
-                    var destDir2=path.join(destDir,"src");
-                    var destPath=path.join(destDir2,fName);
+                    var destSrcDir=path.join(destDir,"src");
+                    var destPath=path.join(destSrcDir,fName);
                     
                     console.log("Copying: "+srcPath+" -> "+destPath);
-                    proms.push(fs.ensureDir(destDir2)
+                    proms.push(fs.ensureDir(destSrcDir)
                         .then(function() {
                             return fs.copy(srcPath,destPath, {
                                 overwrite: true
@@ -139,7 +139,9 @@ TwinTron_CordovaBuilder.prototype={
         var workDir=this.opts.workDir || process.cwd();
         var srcDir=path.join(workDir,"src");
         var webDir=path.join(workDir,"www");
-        var destDir=path.join(workDir,"cordova", "www");
+        var destDir=path.join(workDir,"cordova");
+        var destSrcDir=path.join(destDir, "src");
+        var destWebDir=path.join(destDir, "www");
         
         var config=this.opts;
         return fs.readJson(path.join(workDir,"package.json"))
@@ -153,16 +155,22 @@ TwinTron_CordovaBuilder.prototype={
                 return builder.prebuild(config);
             })
             .then(function() {
-                //Step 2: Compile source files
+                //Step 2: NPM Install
+                var cmd="npm";
+                var cmdArgs=[ "install" ];
+                return utils.exec(cmd,cmdArgs,destSrcDir);
+            })
+            .then(function() {
+                //Step 3: Compile source files
                 var mainJsFile=config.mainJsFile || "twintron.cordova.js";
                 //var mainJsPath=path.join("src",mainJsFile);
                 var mainJsBundleFile=config.mainJsFile || "twintron.cordova.bundle.js";
-                var mainJsBundlePath=path.join(destDir,"assets","js",mainJsBundleFile);
+                var mainJsBundlePath=path.join(destWebDir,"assets","js",mainJsBundleFile);
                 
                 console.log("Compiling sources & dependency JS files");
                 var cmd="browserify";
                 var cmdArgs=[ mainJsFile, "-o", mainJsBundlePath ];
-                return utils.exec(cmd,cmdArgs,srcDir);
+                return utils.exec(cmd,cmdArgs,destSrcDir);
             })
             .then(function() {
                 var cmd="cordova";

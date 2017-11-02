@@ -1,6 +1,6 @@
 {
   "name": "twintron",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "TwinTron: Minimalistic Framework & Build tool for deploying HTML5+JS Web App to Electron & Cordova",
   "main": "main.js",
   "bin": {
