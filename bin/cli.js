@@ -11,6 +11,9 @@ var cli={
             action: null,
             args: []
         };
+        //TEST {
+        console.log(args);
+        // }
         var n=(args) ? args.length : 0;
         var lastArg=null;
         for (var i=2;i < n;i++) {
