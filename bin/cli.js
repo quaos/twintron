@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 
 //Namespaces
 var TwinTron=TwinTron || {};
