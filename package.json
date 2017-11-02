@@ -6,6 +6,9 @@
   "bin": {
     "twintron": "bin/cli.js"
   },
+  "engines": {
+    "node": ">= 4.0"
+  },
   "scripts": {
     "start": "node bin/cli.js",
     "test": "echo \"Error: no test specified\" && exit 1"
