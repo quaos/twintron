@@ -12,6 +12,9 @@ console.log(process);
 //Global Namespaces
 var TwinTron=window.TwinTron || {};
 
+var _twintron=require("./twintron");
+utils.merge(TwinTron,_twintron,true);
+
 function TwinTron_ElectronWebApp(opts) {
     TwinTron_ElectronWebApp._super.prototype.constructor.call(this,opts);
 }
@@ -23,22 +26,25 @@ TwinTron_ElectronWebApp.prototype=utils.extendClass(TwinTron.WebApp, {
     constructor: TwinTron_ElectronWebApp,
     
     init: function() {
-        this._super.prototype.init.call(this);
-        
         var _static=TwinTron_ElectronWebApp;
         var app=this;
         var win=this.window;
-        
-        electron.ipcRenderer.on("async-reply", function onMainAsyncReply(event, msg) {
-            console.log("Got reply message from Electron main process:");
-            console.log(msg);
-        });
-        
-        var navCtrl=win.navigationController;
-        navCtrl.on(TwinTron.NavigationController.EVT_LINK, function onMainWindowLinkActivated(evt) {
-            console.log("Link event in Electron renderer process: "+evt.url);
-            electron.ipcRenderer.send("async", evt);
-        });
+   
+        return this._super.prototype.init.call(this)
+            .then(function() {
+                electron.ipcRenderer.on("async-reply", function onMainAsyncReply(event, msg) {
+                    console.log("Got reply message from Electron main process:");
+                    console.log(msg);
+                });
+
+                var navCtrl=app.rootPageController.navigationController;
+                navCtrl.on(TwinTron.NavigationController.EVT_LINK, function onMainWindowLinkActivated(evt) {
+                    console.log("Link event in Electron renderer process: "+evt.url);
+                    electron.ipcRenderer.send("async", evt);
+                });
+                
+                return Promise.resolve(true);
+            });
     }
 }, TwinTron_ElectronWebApp_static);
 

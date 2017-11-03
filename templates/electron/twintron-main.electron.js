@@ -47,7 +47,7 @@ app.initApp=function initApp() {
     TwinTron.Storage=TwinTron_StorageImpl_Electron$Factory;
     
     console.log("Creating navigation controller from Electron App");
-    this.navigationController=TwinTron.NavigationController({
+    this.navigationController=new TwinTron.NavigationController({
         /*links: [
             { title: "Home", url: "index.html" },
             { title: "About", url: "about.html" },

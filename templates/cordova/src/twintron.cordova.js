@@ -128,6 +128,8 @@ utils.merge(TwinTron, _twintron, true);
             j$(this.rootPageController.mainContainer).show();
              */
             //this.navigationController.pushURL("home.html");
+            this.rootPageController.mainContainer.contentWindow.width=win.innerWidth;
+            this.rootPageController.mainContainer.contentWindow.height=win.innerHeight-this.rootPageController.mainContainer.offsetTop;
 
             this.receivedEvent('deviceready');
         },

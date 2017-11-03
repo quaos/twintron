@@ -23,19 +23,19 @@
     <!-- <script type="text/javascript" src="assets/js/main-bundle.js"></script> -->
     <script type="text/javascript">
     (function(doc,win,j$) {
-        var rootPage=require("./twintron-renderer.electron.js")({
+        var app=require("./twintron-renderer.electron.js")({
             document: doc,
             window: win,
             jQuery: j$
         });
         //doc.addEventListener("DOMContentLoaded", rootPage.init.bind(rootPage));
         doc.addEventListener("DOMContentLoaded", function onPageReady() {
-            rootPage.init()
+            app.init()
                 .then(function() {
-                    rootPage.navigationController.pushURL("home.html");
+                    app.rootPageController.navigationController.pushURL("home.html");
                 });
         }); 
-        return rootPage;
+        return app;
     })(document,window,jQuery.noConflict(true));
     </script>
   </body>

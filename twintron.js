@@ -148,6 +148,7 @@ TwinTron.NavigationController=TwinTron_NavigationController;
 function TwinTron_WebPageController(opts) {
     this.opts=opts || {};
     if (opts) {
+        this.currentApp=opts.currentApp;
         this.document=opts.document || document;
         this.window=opts.window || window;
         this.jQuery=opts.jQuery || jQuery;
@@ -156,6 +157,7 @@ function TwinTron_WebPageController(opts) {
 TwinTron_WebPageController.prototype={
     constructor: TwinTron_WebPageController,
     
+    currentApp: null,
     opts: null,
     document: null,
     window: null,
@@ -165,14 +167,30 @@ TwinTron_WebPageController.prototype={
     mainNav: null,
 
     init: function() {
-        var app=this;
+        var page=this;
         var doc=this.document;
         var win=this.window;
         var j$=this.jQuery;
-
+        
+        var app=this.currentApp;
+        if (!app) {
+            if ((win) && (win.TwinTron) && (win.TwinTron.currentApp)) {
+                console.log("Current app found in this window: "+win.location.href);
+                app=win.TwinTron.currentApp;
+            }
+            if ((!app) && (win.parent) && (win.parent.TwinTron) && (win.parent.TwinTron.currentApp)) {
+                console.log("Current app found in parent window: "+win.parent.location.href);
+                app=win.parent.TwinTron.currentApp;
+            }
+            this.currentApp=app;
+        }
+        if (!app) {
+            return Promise.reject(new Error("Current app instance not found"));
+        }
+        
         var navCtrl=win.navigationController;
         //Attach navigation controller
-        if ((!navCtrl) && (win.parent)) {
+        if ((!navCtrl) && (win.parent) && (win.parent.navigationController)) {
             console.log("Inherited navigation controller from parent: "+win.parent.location.href);
             navCtrl=win.parent.navigationController;
         }
@@ -275,7 +293,7 @@ TwinTron_RootPageController.prototype=utils.extendClass(TwinTron_WebPageControll
 
         var navCtrl=win.navigationController;
         if (!navCtrl) {
-            console.warn("Creating navigation controller for root page");
+            console.info("Creating navigation controller for root page");
             navCtrl=new TwinTron.NavigationController({
                 links: page.navLinks
             });
@@ -357,6 +375,8 @@ TwinTron_WebApp.prototype={
         var win=this.window;
         var j$=this.jQuery;
 
+        win.TwinTron=win.TwinTron || TwinTron;
+        win.TwinTron.currentApp=app;
         return this.rootPageController.init()
             .then(function(result) {
                 app.navigationController=app.rootPageController.navigationController;
