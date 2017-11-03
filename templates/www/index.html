@@ -24,24 +24,21 @@
     <script type="text/javascript" src="assets/js/popper.min.js"></script>
     <script type="text/javascript" src="assets/js/tether.min.js"></script>
     <script type="text/javascript" src="assets/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="assets/js/q-require.js"></script>
+    <!-- <script type="text/javascript" src="assets/js/q-require.js"></script> -->
     <script type="text/javascript">
     //Namespaces
     var TwinTron=TwinTron || {};
     </script>
     <script type="text/javascript" src="assets/js/main-bundle.js"></script>
-    <!--
-    REFACTORED: Moved this part to src/main.js
     <script type="text/javascript">
     (function(doc,win,j$) {
-        var rootPage=new TwinTron.RootPageController({
+        var app=TwinTron.createMainApp({
             document: doc,
             window: win,
             jQuery: j$
         });
-        doc.addEventListener("DOMContentLoaded", rootPage.init.bind(rootPage));
+        //doc.addEventListener("DOMContentLoaded", app.init.bind(app));
     })(document,window,jQuery.noConflict(true));
     </script>
-    -->
   </body>
 </html>

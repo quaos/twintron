@@ -20,11 +20,12 @@
 //Global Namespaces
 var TwinTron=window.TwinTron || {};
 
-(function TwinTron_CordovaApp$Closure() {
-    var utils=require("./q-utils");
-    var _twintron=require("./twintron");
-    utils.merge(TwinTron, _twintron, true);
+var utils=require("./q-utils");
+var _twintron=require("./twintron");
+utils.merge(TwinTron, _twintron, true);
 
+(function TwinTron_CordovaApp$Closure() {
+    
     function TwinTron_StorageImpl_Cordova(opts) {    
        this.opts=opts || {};
     };
@@ -79,18 +80,22 @@ var TwinTron=window.TwinTron || {};
             var _static=TwinTron_CordovaApp;
             var app=this;
             var win=this.window;
+            var doc=this.document;
             var j$=this.jQuery;
             
-            TwinTron_CordovaApp._super.prototype.initApp.call(this);
+            return TwinTron_CordovaApp._super.prototype.init.call(this)
+                .then(function() {
+                    doc.addEventListener("deviceready", app.onDeviceReady.bind(app), false);
+                    console.log("TwinTron CordovaApp initialized");
+                });
             
-            this.mainContainer=this.document.getElementById("mainContainer");
+            /*this.mainContainer=this.document.getElementById("mainContainer");
             j$(this.mainContainer).hide();
-            
             /*
             console.log("Creating navigation controller from Cordova App");
             this.navigationController=TwinTron.NavigationController({
             });
-            */
+            * /
            
             this.navigationController.on(TwinTron.NavigationController.EVT_LINK, function onLink(evt) {
                 console.log("Navigating to page: "+evt.url+((evt.link) ? " ["+evt.link.title+"]" : ""));
@@ -100,6 +105,7 @@ var TwinTron=window.TwinTron || {};
             this.document.addEventListener("deviceready", this.onDeviceReady.bind(this), false);
 
             console.log("TwinTron CordovaApp initialized");
+            */
         },
 
         // deviceready Event Handler
@@ -110,15 +116,18 @@ var TwinTron=window.TwinTron || {};
             var win=this.window;
             var j$=this.jQuery;
 
+            /*
             //Inject TwinTron API and instance objects into mainContainer IFrame's Window
-            this.mainContainer.contentWindow.TwinTron=TwinTron;
-            this.mainContainer.contentWindow.app=this;
-            this.mainContainer.contentWindow.navigationController=this.navigationController;
+            this.rootPageController.mainContainer.contentWindow.TwinTron=TwinTron;
+            this.rootPageController.mainContainer.contentWindow.app=this;
+            this.rootPageController.mainContainer.contentWindow.navigationController=this.navigationController;
 
-            this.mainContainer.src="home.html";
-            this.mainContainer.width=win.clientWidth;
-            this.mainContainer.height=win.clientHeight;
-            j$(this.mainContainer).show();
+            //this.mainContainer.src="home.html";
+            this.rootPageController.mainContainer.width=win.clientWidth;
+            this.rootPageController.mainContainer.height=win.clientHeight-this.mainContainer.offsetTop;
+            j$(this.rootPageController.mainContainer).show();
+             */
+            //this.navigationController.pushURL("home.html");
 
             this.receivedEvent('deviceready');
         },
@@ -140,16 +149,36 @@ var TwinTron=window.TwinTron || {};
     TwinTron.CordovaApp=utils.makeFactory(TwinTron_CordovaApp, function TwinTron_CordovaApp$Factory(opts) {
         return new TwinTron_CordovaApp(opts);
     });
-    
-    /**
-     * Sample Code to initialize TwinTron.CordovaApp:
-     */
-    /*var app=TwinTron.CordovaApp({
-        document: document,
-        window: window,
-        jQuery: jQuery.noConflict(true)
-    });
-    document.addEventListener("DOMContentLoaded", app.initApp.bind(app));*/
-    
-    return TwinTron_CordovaApp$Factory;
 })();
+
+TwinTron.createCordovaApp=function TwinTron_createCordovaApp(opts) {
+    var navLinks=require("./navlinks");
+    utils.merge(opts, {
+        navigationLinks: navLinks
+    }, true);
+    var app=TwinTron.CordovaApp(opts);
+    var doc=opts.document || document;
+    doc.addEventListener("DOMContentLoaded", function onPageReady() {
+        app.init()
+            .then(function() {
+                app.navigationController.pushURL("home.html");
+            });
+    }); 
+    return app;
+};
+
+/*var jQuery=window.jQuery; //|| require("./assets/js/jquery-3.2.1.slim.min.js");
+(function(doc,win,j$) {
+    /**
+     * Code to initialize TwinTron.CordovaApp:
+     * /
+    var app=TwinTron.CordovaApp({
+        document: doc,
+        window: win,
+        jQuery: j$
+    });
+    doc.addEventListener("DOMContentLoaded", app.init.bind(app));
+    
+    return app;
+})(document,window,jQuery.noConflict(true));
+*/

@@ -20,7 +20,7 @@
     <script type="text/javascript">
     window.$ = window.jQuery = require("./assets/js/jquery-3.2.1.slim.min.js");
     </script>
-    <script type="text/javascript" src="assets/js/main-bundle.js"></script>
+    <!-- <script type="text/javascript" src="assets/js/main-bundle.js"></script> -->
     <script type="text/javascript">
     (function(doc,win,j$) {
         var rootPage=require("./twintron-renderer.electron.js")({
@@ -28,7 +28,14 @@
             window: win,
             jQuery: j$
         });
-        doc.addEventListener("DOMContentLoaded", rootPage.init.bind(rootPage));
+        //doc.addEventListener("DOMContentLoaded", rootPage.init.bind(rootPage));
+        doc.addEventListener("DOMContentLoaded", function onPageReady() {
+            rootPage.init()
+                .then(function() {
+                    rootPage.navigationController.pushURL("home.html");
+                });
+        }); 
+        return rootPage;
     })(document,window,jQuery.noConflict(true));
     </script>
   </body>

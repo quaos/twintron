@@ -363,7 +363,7 @@ TwinTron_WebApp.prototype={
                 return Promise.resolve(result);
             })
             .catch(function(err) {
-                console.error(err.message || err);
+                console.error(err);
             });
     }
 };
